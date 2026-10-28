@@ -1,0 +1,40 @@
+
+include("lib/http.bzg");
+
+var server = http(8000);
+
+// HTTP EVENT HANDLERS
+server.get = function (path, data) {
+    print("get loc:" + path);
+
+    if (path == "/") {
+        server.sendFile("public/index.html");
+    }
+    else {
+        server.sendFile("public/404.html");
+    }
+};
+
+// WEBSOCKET EVENT HANDLERS
+
+server.onConnect = function (clientId) {
+    print("WebSocket connected! Client ID: " + clientId);
+    server.send(clientId, "Welcome toWebSocket server!");
+};
+
+server.onData = function (message, clientId) {
+    print("Received from Client " + clientId + ": " + message);
+
+    // Echo response (disabled)
+    //server.send(clientId, "Echo: " + message);
+    //server.send(clientId, message);
+
+    // Broadcast to all clients
+    server.sendAll("User " + clientId + " says: " + message);
+};
+
+server.onDisconnect = function (clientId) {
+    print("WebSocket disconnected! Client ID: " + clientId);
+};
+
+server.run();
